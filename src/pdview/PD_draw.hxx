@@ -49,8 +49,8 @@
 
 #include <string>
 
-#include <mgl/mgl.h>
-#include <mgl/mgl_data.h>
+#include <mgl2/mgl.h>
+#include <mgl2/data.h>
 
 #include <algorithm>
 #include "PD_params.hxx"
@@ -61,6 +61,13 @@ private:
   
   
 public:
+  // MathGL 2 draw callbacks take an mglBase*, wrap it in a mglGraph
+  static int DrawBase(mglBase *b, void *par)
+  {
+    mglGraph gr(b);
+    return Draw(&gr,par);
+  }
+
   static int Draw(mglGraph *gr, void *par)
   {
     static std::string markOpt[4] = {"b o#", "g s#", "r d#", "p v#"};
@@ -81,7 +88,7 @@ public:
     //gr->SetAlphaDef(0.5);
 
     gr->Rotate(0,0);
-    gr->Axis(mglPoint(p->x1,p->y1,1),mglPoint(p->x2,p->y2,1));
+    gr->SetRanges(mglPoint(p->x1,p->y1,-1),mglPoint(p->x2,p->y2,1));
     gr->SetMarkSize(0.01);
     gr->Box("",false);
     gr->Label('x',p->x_label.c_str(),0);
@@ -94,13 +101,13 @@ public:
 	//printf (" [%ld %ld %ld/%ld]\n",p->Hx.nx,p->Hy.nx,p->H.nx,p->H.ny);
 	//gr->SetPalColor(0,1.0,1.0,1.0);
 
-	gr->CRange(p->H);
-	gr->Dens(p->Hx,p->Hy,p->H,"",-1);	
+	gr->SetRange('c',p->H);
+	gr->Dens(p->Hx,p->Hy,p->H,"");	
 	gr->Colorbar();
 	float level=(p->logH)?(log10(2)/30):(2./30);
 	mglData levs;
 	levs.Set(&level,1);
-	gr->Cont(levs,p->Hx,p->Hy,p->H,"k",-0.99);
+	gr->Cont(levs,p->Hx,p->Hy,p->H,"k");
       }
     /*
     mglData a(50,40);
@@ -109,12 +116,12 @@ public:
     */
     if (p->logX) 
       {
-	if (p->logY) gr->SetFunc("lg(x)", "lg(y)", 0);
-	else gr->SetFunc("lg(x)", 0, 0);
+	if (p->logY) gr->SetFunc("lg(x)", "lg(y)", NULL);
+	else gr->SetFunc("lg(x)", NULL, NULL);
       }
-    else if (p->logY) gr->SetFunc(0, "lg(y)", 0);
+    else if (p->logY) gr->SetFunc(NULL, "lg(y)", NULL);
 
-    gr->Axis("xy",true);
+    gr->Axis("xy");
 
 
     

@@ -309,7 +309,7 @@ class PDV_interface : public QWidget
     barLayout->addWidget(mousePosLabel);
 
     graphW->autoResize=true;         
-    graphW->setDraw(PD_draw::Draw,graphW->p);    
+    graphW->setDraw(PD_draw::DrawBase,graphW->p);    
   }
 
   ~PDV_interface()

@@ -56,9 +56,10 @@
 #include <algorithm>
 #include <limits>
 
-#include <mgl/mgl_qt.h>
-#include <mgl/mgl_data.h>
-#include <mgl/mgl.h>
+#include <mgl2/qmathgl.h>
+#include <mgl2/data.h>
+#include <mgl2/mgl.h>
+#include <mgl2/canvas.h> // QMathGL only forward-declares mglCanvas, we need the full type
 
 #include "PD_params.hxx"
 
@@ -280,8 +281,9 @@ public:
 
   public:
   PD_params *p;
+  mglGraph *graph;
  
-  PD_widget(QWidget *parent = 0, Qt::WindowFlags f = 0):
+  PD_widget(QWidget *parent = 0, Qt::WindowFlags f = Qt::WindowFlags()):
     QMathGL(parent,f),
     mouseMode(0),
     pLevel(4,-1),
@@ -289,10 +291,12 @@ public:
     noUpdates(false)
   {
     p=new PD_params();
+    graph=new mglGraph(gr); // MathGL 2: wrap the widget's canvas for CalcXYZ/CalcScr
   }
 
   ~PD_widget()
   {
+    delete graph;
     delete p;
   }
 
@@ -394,12 +398,12 @@ protected:
 
     bool old_L=old_mouseButtons & Qt::LeftButton;
     bool old_R=old_mouseButtons & Qt::RightButton;
-    bool old_M=old_mouseButtons & Qt::MidButton;
+    bool old_M=old_mouseButtons & Qt::MiddleButton;
     bool old_LR=old_L&&old_R;
 
     bool L=mouseButtons & Qt::LeftButton;
     bool R=mouseButtons & Qt::RightButton;
-    bool M=mouseButtons & Qt::MidButton;
+    bool M=mouseButtons & Qt::MiddleButton;
     bool LR=L&&R;
 
     if (mouseMode)
