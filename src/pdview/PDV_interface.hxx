@@ -255,8 +255,12 @@ class PDV_interface : public QWidget
     ft.setBold(true);
     allDone->setFont(ft);
     toolbar->addSeparator();
+    QAction *keys=toolbar->addAction("Keys");
+    keys->setToolTip("Show/hide the mouse controls legend drawn on the plot");
+    keys->setCheckable(true);
+    keys->setChecked(true);
     help=toolbar->addAction("?");
-    
+
 
     helpDialog = new myHelpDialog(this);
        
@@ -281,6 +285,7 @@ class PDV_interface : public QWidget
 
     connect(plotRatio,SIGNAL(toggled(bool)), graphW, SLOT(plotRatio_slot(bool)));
     connect(setPer,SIGNAL(toggled(bool)), graphW, SLOT(setMouseMode_slot(bool)));
+    connect(keys,SIGNAL(toggled(bool)), graphW, SLOT(showLegend_slot(bool)));
 
 
     connect(graphW,SIGNAL(uncheckPlotRatio()), this, SLOT(uncheckPlotRatio()));

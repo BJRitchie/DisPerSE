@@ -288,7 +288,8 @@ public:
     mouseMode(0),
     pLevel(4,-1),
     sLevel(-1),
-    noUpdates(false)
+    noUpdates(false),
+    showLegend(true)
   {
     p=new PD_params();
     graph=new mglGraph(gr); // MathGL 2: wrap the widget's canvas for CalcXYZ/CalcScr
@@ -677,9 +678,70 @@ private:
   std::vector<double> pLevel;
   double sLevel;
   bool noUpdates;
-  
+  bool showLegend;
+
+  // Overlay explaining the mouse controls, drawn in the top-right corner of the plot
+  void drawLegend(QPainter &painter)
+  {
+    if (!showLegend) return;
+
+    static const char *keys[][2] = {
+      {"Left click",       "zoom in"},
+      {"Right click",      "zoom out"},
+      {"Left drag",        "zoom to box"},
+      {"Middle drag",      "pan"},
+      {"Left+Right click", "reset view"},
+      {"Ctrl+Left drag",   "set threshold (release to fix)"},
+      {"'Set' button",     "threshold follows cursor (untoggle to fix)"},
+      {"'DONE' button",    "quit, return threshold to mse"}
+    };
+    const int nKeys=sizeof(keys)/sizeof(keys[0]);
+
+    painter.save();
+    QFont font=painter.font();
+    font.setPointSize(8);
+    painter.setFont(font);
+    QFontMetrics fm(font);
+
+    const int pad=6;
+    const int lineH=fm.height()+1;
+    int keyW=0,descW=0;
+    for (int i=0;i<nKeys;i++)
+      {
+	keyW=std::max(keyW,fm.horizontalAdvance(keys[i][0]));
+	descW=std::max(descW,fm.horizontalAdvance(keys[i][1]));
+      }
+    const int w=keyW+descW+4*pad;
+    const int h=(nKeys+1)*lineH+2*pad;
+    const int x0=std::max(8,width()-w-8),y0=8; // top-right, clear of the y axis label
+
+    painter.setPen(QPen(Qt::gray,1));
+    painter.setBrush(QColor(255,255,255,215));
+    painter.drawRect(x0,y0,w,h);
+
+    painter.setPen(Qt::black);
+    font.setBold(true);
+    painter.setFont(font);
+    painter.drawText(x0+pad,y0+pad+fm.ascent(),"Controls (toggle with 'Keys')");
+    font.setBold(false);
+    painter.setFont(font);
+    for (int i=0;i<nKeys;i++)
+      {
+	int y=y0+pad+(i+1)*lineH+fm.ascent();
+	painter.drawText(x0+pad,y,keys[i][0]);
+	painter.drawText(x0+2*pad+keyW,y,keys[i][1]);
+      }
+    painter.restore();
+  }
+
+public slots:
+  void showLegend_slot(bool val)
+  {
+    showLegend=val;
+    myUpdate();
+  }
+
 public:
-  
   void blockUpdates(bool val=true)
   {
     noUpdates=val;
@@ -756,6 +818,7 @@ public:
 	    painter.drawRect(std::min(p1.x(),p2.x()),std::min(p1.y(),p2.y()),
 			     fabs(p1.x()-p2.x()),fabs(p1.y()-p2.y()));
 	  }
+	drawLegend(painter);
       }
     else 
       {	
@@ -834,9 +897,10 @@ public:
 	      painter.drawText(pa.x,pa.y,QString("p=%1-sigma").arg(nsig));
 	    else 
 	      painter.drawText(pa.x,pa.y,QString("p=%1").arg(pLevel[0]));
-	  }	
+	  }
+	drawLegend(painter);
       }
-  
+
      old_mouseMode=mouseMode;
   }
   
