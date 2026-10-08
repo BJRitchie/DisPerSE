@@ -285,6 +285,8 @@ public:
  
   PD_widget(QWidget *parent = 0, Qt::WindowFlags f = Qt::WindowFlags()):
     QMathGL(parent,f),
+    old_mouseButtons(0),
+    old_mousePos(0,0),
     mouseMode(0),
     pLevel(4,-1),
     sLevel(-1),

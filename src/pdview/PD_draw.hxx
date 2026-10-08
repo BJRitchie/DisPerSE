@@ -89,6 +89,9 @@ public:
 
     gr->Rotate(0,0);
     gr->SetRanges(mglPoint(p->x1,p->y1,-1),mglPoint(p->x2,p->y2,1));
+    // MathGL 2's default font is much larger than 1.x's: shrink it so tick labels
+    // (esp. on linear axes) stay horizontal and don't collide with the axis labels
+    gr->SetFontSize(2);
     gr->SetMarkSize(0.01);
     gr->Box("",false);
     gr->Label('x',p->x_label.c_str(),0);
