@@ -5,7 +5,11 @@ include_directories(${MSE_DIR})
 
 if(GSL_FOUND AND CGAL_FOUND)
 
-  include( ${CGAL_USE_FILE} )
+  # Modern CGAL (>= 5) is header-only behind the CGAL::CGAL imported target and
+  # CGAL 6 no longer defines CGAL_USE_FILE; only fall back to it for old CGALs.
+  if(NOT TARGET CGAL::CGAL)
+    include( ${CGAL_USE_FILE} )
+  endif()
 
   if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     STRING(REGEX REPLACE "-O2" " "  CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" )
@@ -73,6 +77,13 @@ if(GSL_FOUND AND CGAL_FOUND)
 
   add_executable(delaunay_2D ${DELAUNAY2D_SRC})
   add_executable(delaunay_3D ${DELAUNAY3D_SRC})
+
+  # The imported target carries the right GMP/MPFR link flags (without it, macOS
+  # builds hit ___gmpn_* undefined symbols).
+  if(TARGET CGAL::CGAL)
+    target_link_libraries(delaunay_2D CGAL::CGAL)
+    target_link_libraries(delaunay_3D CGAL::CGAL)
+  endif()
   
   #target_link_libraries(delaunay_2D ${GSL_LIBRARIES})
   #target_link_libraries(delaunay_3D ${GSL_LIBRARIES})

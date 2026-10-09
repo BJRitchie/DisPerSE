@@ -1,5 +1,11 @@
 project(DISPERSE)
 
+# CGAL >= 6 headers need C++17 (std::optional/std::variant); libc++ (macOS) hides the
+# pre-C++17 std::unary_function/binary_function used in this codebase unless re-enabled.
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+add_definitions(-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION)
+
 set(USE_LONG_INT_DEF false)
 set(USE_TR1_DEF true)
 set(USE_THREADS_DEF true)
